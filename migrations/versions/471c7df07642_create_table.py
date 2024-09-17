@@ -1,8 +1,8 @@
-"""Database creation
+"""create table
 
-Revision ID: 93d4b6fd536c
+Revision ID: 471c7df07642
 Revises: 
-Create Date: 2024-09-17 10:27:54.671275
+Create Date: 2024-09-17 16:24:26.506405
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "93d4b6fd536c"
+revision: str = "471c7df07642"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -120,7 +120,6 @@ def upgrade() -> None:
         sa.Column("first_name", sa.String(length=50), nullable=False),
         sa.Column("last_name", sa.String(length=50), nullable=False),
         sa.Column("patronymic", sa.String(length=50), nullable=False),
-        sa.Column("id_point", sa.Integer(), nullable=False),
         sa.Column("id_team", sa.Integer(), nullable=False),
         sa.Column(
             "created_on",
@@ -134,16 +133,12 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(
-            ["id_point"], ["point.id"], ondelete="CASCADE"
-        ),
         sa.ForeignKeyConstraint(["id_team"], ["team.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint(
             "first_name",
             "last_name",
             "patronymic",
-            "id_point",
             "id_team",
             name="player_uc",
         ),
@@ -179,6 +174,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("id_player", sa.Integer(), nullable=False),
         sa.Column("id_parameter", sa.Integer(), nullable=False),
+        sa.Column("id_team", sa.Integer(), nullable=False),
         sa.Column("count", sa.Integer(), nullable=False),
         sa.Column(
             "created_on",
@@ -198,9 +194,10 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["id_player"], ["player.id"], ondelete="CASCADE"
         ),
+        sa.ForeignKeyConstraint(["id_team"], ["team.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint(
-            "id_player", "id_parameter", name="player_parameter_uc"
+            "id_player", "id_parameter", "id_team", name="player_parameter_uc"
         ),
     )
     # ### end Alembic commands ###

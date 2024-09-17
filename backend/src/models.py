@@ -83,7 +83,6 @@ class Point(Base):
     updated_on: Mapped[updated_on]
 
     teams: Mapped[list['Team']] = relationship(back_populates='point')
-    players: Mapped[list['Player']] = relationship(back_populates='point')
     tournaments: Mapped[list['Tournament']] = relationship(back_populates='point')
 
     repr_cols_num = 2
@@ -103,6 +102,7 @@ class Team(Base):
 
     point: Mapped['Point'] = relationship(back_populates='teams')
     players: Mapped[list['Player']] = relationship(back_populates='team')
+    player_parameters: Mapped[list['PlayerParameter']] = relationship(back_populates='team')
     tournament_teams: Mapped[list['TournamentTeam']] = relationship(back_populates='team')
 
     repr_cols_num = 3
@@ -134,14 +134,12 @@ class Player(Base):
     first_name: Mapped[str50]
     last_name: Mapped[str50]
     patronymic: Mapped[str50]
-    id_point: Mapped[point_fk]
     id_team: Mapped[team_fk]
-    __table_args__ = (UniqueConstraint('first_name', 'last_name', 'patronymic', 'id_point', 'id_team', name='player_uc'),)
+    __table_args__ = (UniqueConstraint('first_name', 'last_name', 'patronymic', 'id_team', name='player_uc'),)
 
     created_on: Mapped[created_on]
     updated_on: Mapped[updated_on]
 
-    point: Mapped['Point'] = relationship(back_populates='players')
     team: Mapped['Team'] = relationship(back_populates='players')
     player_parameters: Mapped[list['PlayerParameter']] = relationship(back_populates='player')
 
@@ -158,7 +156,7 @@ class Parameter(Base):
     created_on: Mapped[created_on]
     updated_on: Mapped[updated_on]
 
-    player_parameters: Mapped[list['PlayerParameter']] = relationship(back_populates='player')
+    player_parameters: Mapped[list['PlayerParameter']] = relationship(back_populates='parameter')
 
 
 class PlayerParameter(Base):
@@ -167,13 +165,15 @@ class PlayerParameter(Base):
     id: Mapped[intpk]
     id_player: Mapped[player_fk]
     id_parameter: Mapped[parameter_fk]
+    id_team: Mapped[team_fk]
     count: Mapped[int]
-    __table_args__ = (UniqueConstraint('id_player', 'id_parameter', name='player_parameter_uc'),)
+    __table_args__ = (UniqueConstraint('id_player', 'id_parameter', 'id_team',  name='player_parameter_uc'),)
 
     created_on: Mapped[created_on]
     updated_on: Mapped[updated_on]
 
     player: Mapped['Player'] = relationship(back_populates='player_parameters')
+    team: Mapped['Team'] = relationship(back_populates='player_parameters')
     parameter: Mapped['Parameter'] = relationship(back_populates='player_parameters')
 
     repr_cols_num = 4
