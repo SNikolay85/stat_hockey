@@ -1,3 +1,4 @@
+from time import timezone
 from typing import Optional
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -24,14 +25,16 @@ team_fk = Annotated[int, mapped_column(ForeignKey('team.id', ondelete="CASCADE")
 tournament_fk = Annotated[int, mapped_column(ForeignKey('tournament.id', ondelete="CASCADE"))]
 player_fk = Annotated[int, mapped_column(ForeignKey('player.id', ondelete="CASCADE"))]
 parameter_fk = Annotated[int, mapped_column(ForeignKey('parameter.id', ondelete="CASCADE"))]
+role_fk = Annotated[int, mapped_column(ForeignKey('role.id', ondelete="CASCADE"))]
 
 str100 = Annotated[str, 100]
 str20 = Annotated[str, 20]
 str50 = Annotated[str, 50]
 date = Annotated[date, mapped_column(Date)]
+date_full = Annotated[datetime, mapped_column(DateTime)]
 
 created_on = Annotated[datetime, mapped_column(DateTime(timezone=True), server_default=func.now())]
-updated_on = Annotated[datetime, mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now)]
+updated_on = Annotated[datetime, mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())]
 
 
 class Base(DeclarativeBase):
@@ -101,9 +104,9 @@ class Team(Base):
     updated_on: Mapped[updated_on]
 
     point: Mapped['Point'] = relationship(back_populates='teams')
-    players: Mapped[list['Player']] = relationship(back_populates='team')
     player_parameters: Mapped[list['PlayerParameter']] = relationship(back_populates='team')
     tournament_teams: Mapped[list['TournamentTeam']] = relationship(back_populates='team')
+    player_teams: Mapped[list['PlayerTeam']] = relationship(back_populates='team')
 
     repr_cols_num = 3
     repr_cols = tuple()
@@ -127,6 +130,36 @@ class TournamentTeam(Base):
     repr_cols = tuple()
 
 
+class PlayerTeam(Base):
+    __tablename__ = 'player_team'
+
+    id: Mapped[intpk]
+    id_player: Mapped[player_fk]
+    id_team: Mapped[team_fk]
+    __table_args__ = (UniqueConstraint('id_player', 'id_team', name='player_team_uc'),)
+
+    created_on: Mapped[created_on]
+    updated_on: Mapped[updated_on]
+
+    player: Mapped['Player'] = relationship(back_populates='player_teams')
+    team: Mapped['Team'] = relationship(back_populates='player_teams')
+
+    repr_cols_num = 3
+    repr_cols = tuple()
+
+
+class Role(Base):
+    __tablename__ = 'role'
+
+    id: Mapped[intpk]
+    name_role: Mapped[str50] = mapped_column(unique=True)
+
+    created_on: Mapped[created_on]
+    updated_on: Mapped[updated_on]
+
+    players: Mapped[list['Player']] = relationship(back_populates='role')
+
+
 class Player(Base):
     __tablename__ = 'player'
 
@@ -134,16 +167,17 @@ class Player(Base):
     first_name: Mapped[str50]
     last_name: Mapped[str50]
     patronymic: Mapped[str50]
-    id_team: Mapped[team_fk]
-    __table_args__ = (UniqueConstraint('first_name', 'last_name', 'patronymic', 'id_team', name='player_uc'),)
+    id_role: Mapped[role_fk]
+    __table_args__ = (UniqueConstraint('first_name', 'last_name', 'patronymic', 'id_role',  name='player_uc'),)
 
     created_on: Mapped[created_on]
     updated_on: Mapped[updated_on]
 
-    team: Mapped['Team'] = relationship(back_populates='players')
     player_parameters: Mapped[list['PlayerParameter']] = relationship(back_populates='player')
+    player_teams: Mapped[list['PlayerTeam']] = relationship(back_populates='player')
+    role: Mapped['Role'] = relationship(back_populates='players')
 
-    repr_cols_num = 6
+    repr_cols_num = 4
     repr_cols = tuple()
 
 

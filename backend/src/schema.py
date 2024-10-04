@@ -74,21 +74,27 @@ class FullTournamentTeam(TournamentTeamAdd):
 
 
 # --------------------------
+# schemes for model PlayerTeam
+class PlayerTeamAdd(BaseModel):
+    id_player: int
+    id_team: int
+
+
+class FullPlayerTeam(PlayerTeamAdd):
+    id: int
+
+
+# --------------------------
 # schemes for model Player
 class PlayerAdd(BaseModel):
     first_name: str
     last_name: str
     patronymic: str
-    id_team: int
+    id_role: int
 
 
 class FullPlayer(PlayerAdd):
     id: int
-
-
-class FullPlayerRe(FullPlayer):
-    point: 'FullPoint'
-    team: 'FullTeam'
 
 
 # --------------------------
@@ -111,6 +117,16 @@ class PlayerParameterAdd(BaseModel):
 
 
 class FullPlayerParameter(PlayerParameterAdd):
+    id: int
+
+
+# --------------------------
+# schemes for modelRole
+class RoleAdd(BaseModel):
+    name_role: str
+
+
+class FullRole(RoleAdd):
     id: int
 
 

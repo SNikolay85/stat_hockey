@@ -3,15 +3,16 @@ import asyncio
 import os
 import json
 
-from backend.src.models import Session, Point, Team, TournamentTeam, Tournament, Player
-from backend.src.models import Parameter, PlayerParameter
+from backend.src.models import Session, Point, Team, TournamentTeam, Tournament, Player, Role
+from backend.src.models import Parameter, PlayerParameter, PlayerTeam
 
 from backend.src.schema import FullPoint, FullTeam, FullTournamentTeam, FullTournament, FullPlayer
-from backend.src.schema import FullParameter, FullPlayerParameter
+from backend.src.schema import FullParameter, FullPlayerParameter, FullPlayerTeam, FullRole
 
 current = os.getcwd()
 file_name_base = '../download_stat.json'
 full_path = os.path.join(current, file_name_base)
+
 
 async def download_all():
     all_data = []
@@ -61,6 +62,17 @@ async def download_all():
             dict_temp['fields']['id_team'] = i.id_team
             all_data.append(dict_temp)
 
+        query = select(PlayerTeam)
+        result = await session.execute(query)
+        models = result.unique().scalars().all()
+        dto = [FullPlayerTeam.model_validate(row, from_attributes=True) for row in models]
+        for i in dto:
+            dict_temp = {'model': 'player_team', 'fields': {}}
+            dict_temp['fields']['id'] = i.id
+            dict_temp['fields']['id_player'] = i.id_player
+            dict_temp['fields']['id_team'] = i.id_team
+            all_data.append(dict_temp)
+
         query = select(Player)
         result = await session.execute(query)
         models = result.unique().scalars().all()
@@ -72,18 +84,27 @@ async def download_all():
             dict_temp['fields']['first_name'] = i.first_name
             dict_temp['fields']['last_name'] = i.last_name
             dict_temp['fields']['patronymic'] = i.patronymic
-            dict_temp['fields']['id_team'] = i.id_team
+            dict_temp['fields']['id_role'] = i.id_role
             all_data.append(dict_temp)
 
         query = select(Parameter)
         result = await session.execute(query)
         models = result.unique().scalars().all()
         dto = [FullParameter.model_validate(row, from_attributes=True) for row in models]
-        print(dto)
         for i in dto:
             dict_temp = {'model': 'parameter', 'fields': {}}
             dict_temp['fields']['id'] = i.id
             dict_temp['fields']['name'] = i.name
+            all_data.append(dict_temp)
+
+        query = select(Role)
+        result = await session.execute(query)
+        models = result.unique().scalars().all()
+        dto = [FullRole.model_validate(row, from_attributes=True) for row in models]
+        for i in dto:
+            dict_temp = {'model': 'role', 'fields': {}}
+            dict_temp['fields']['id'] = i.id
+            dict_temp['fields']['name_role'] = i.name_role
             all_data.append(dict_temp)
 
         query = select(PlayerParameter)
