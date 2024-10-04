@@ -212,3 +212,14 @@ class PlayerParameter(Base):
 
     repr_cols_num = 4
     repr_cols = tuple()
+
+
+async def delete_tables():
+    async with engine.begin() as connect:
+        await connect.run_sync(Base.metadata.drop_all)
+
+
+async def create_tables():
+    async with engine.begin() as connect:
+        await connect.run_sync(Base.metadata.create_all)
+
