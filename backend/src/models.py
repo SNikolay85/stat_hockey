@@ -167,8 +167,9 @@ class Player(Base):
     first_name: Mapped[str50]
     last_name: Mapped[str50]
     patronymic: Mapped[str50]
+    birth: Mapped[date]
     id_role: Mapped[role_fk]
-    __table_args__ = (UniqueConstraint('first_name', 'last_name', 'patronymic', 'id_role',  name='player_uc'),)
+    __table_args__ = (UniqueConstraint('first_name', 'last_name', 'patronymic', 'birth', 'id_role',  name='player_uc'),)
 
     created_on: Mapped[created_on]
     updated_on: Mapped[updated_on]

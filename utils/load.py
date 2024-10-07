@@ -91,6 +91,7 @@ async def load_db(data_stat):
                 first_name=record['fields']['first_name'],
                 last_name=record['fields']['last_name'],
                 patronymic=record['fields']['patronymic'],
+                birth=format_date(date=record['fields']['birth']),
                 id_role=record['fields']['id_role'],
                 created_on=format_date(date_time=record['fields']['created_on']),
                 updated_on=format_date(date_time=record['fields']['updated_on'])

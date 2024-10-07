@@ -72,6 +72,7 @@ async def download_all():
         dict_temp['fields']['first_name'] = i.first_name
         dict_temp['fields']['last_name'] = i.last_name
         dict_temp['fields']['patronymic'] = i.patronymic
+        dict_temp['fields']['birth'] = str(i.birth)
         dict_temp['fields']['id_role'] = i.id_role
         dict_temp['fields']['created_on'] = str(i.created_on)
         dict_temp['fields']['updated_on'] = str(i.updated_on)
