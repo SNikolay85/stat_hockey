@@ -33,8 +33,8 @@ def format_date(date_cut=None, date_time=None, date=None):
         return datetime.strptime(date_cut, '%Y-%m-%d %H:%M:%S')
 
 
-async def load_db(data_trans):
-    for record in data_trans:
+async def load_db(data_stat):
+    for record in data_stat:
         if record['model'] == 'point':
             point = Point(
                 id=record['fields']['id'],
@@ -64,13 +64,11 @@ async def load_db(data_trans):
             session.add(team)
             await session.commit()
         elif record['model'] == 'tournament':
-            date_format_start = datetime.strptime(record['fields']['date_start'], '%Y-%m-%d').date()
-            date_format_finish = datetime.strptime(record['fields']['date_finish'], '%Y-%m-%d').date()
             tournament = Tournament(
                 id=record['fields']['id'],
                 name_tournament=record['fields']['name_tournament'],
-                date_start=date_format_start,
-                date_finish=date_format_finish,
+                date_start=format_date(date=record['fields']['date_start']),
+                date_finish=format_date(date=record['fields']['date_finish']),
                 id_point=record['fields']['id_point'],
                 created_on=format_date(date_time=record['fields']['created_on']),
                 updated_on=format_date(date_time=record['fields']['updated_on'])
@@ -87,16 +85,6 @@ async def load_db(data_trans):
             )
             session.add(tournament_team)
             await session.commit()
-        elif record['model'] == 'player_team':
-            player_team = PlayerTeam(
-                id=record['fields']['id'],
-                id_player=record['fields']['id_player'],
-                id_team=record['fields']['id_team'],
-                created_on=format_date(date_time=record['fields']['created_on']),
-                updated_on=format_date(date_time=record['fields']['updated_on'])
-            )
-            session.add(player_team)
-            await session.commit()
         elif record['model'] == 'player':
             player = Player(
                 id=record['fields']['id'],
@@ -108,6 +96,16 @@ async def load_db(data_trans):
                 updated_on=format_date(date_time=record['fields']['updated_on'])
             )
             session.add(player)
+            await session.commit()
+        elif record['model'] == 'player_team':
+            player_team = PlayerTeam(
+                id=record['fields']['id'],
+                id_player=record['fields']['id_player'],
+                id_team=record['fields']['id_team'],
+                created_on=format_date(date_time=record['fields']['created_on']),
+                updated_on=format_date(date_time=record['fields']['updated_on'])
+            )
+            session.add(player_team)
             await session.commit()
         elif record['model'] == 'parameter':
             parameter = Parameter(

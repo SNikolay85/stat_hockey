@@ -6,9 +6,6 @@ import json
 from backend.src.models import Session, Point, Team, TournamentTeam, Tournament, Player, Role
 from backend.src.models import Parameter, PlayerParameter, PlayerTeam
 
-from backend.src.schema import FullPoint, FullTeam, FullTournamentTeam, FullTournament, FullPlayer
-from backend.src.schema import FullParameter, FullPlayerParameter, FullPlayerTeam, FullRole
-
 current = os.getcwd()
 file_name_base = '../download_stat.json'
 full_path = os.path.join(current, file_name_base)
@@ -41,6 +38,14 @@ async def download_all():
         dict_temp['fields']['updated_on'] = str(i.updated_on)
         all_data.append(dict_temp)
 
+    for i in await query_data(Role):
+        dict_temp = {'model': 'role', 'fields': {}}
+        dict_temp['fields']['id'] = i.id
+        dict_temp['fields']['name_role'] = i.name_role
+        dict_temp['fields']['created_on'] = str(i.created_on)
+        dict_temp['fields']['updated_on'] = str(i.updated_on)
+        all_data.append(dict_temp)
+
     for i in await query_data(Tournament):
         dict_temp = {'model': 'tournament', 'fields': {}}
         dict_temp['fields']['id'] = i.id
@@ -61,15 +66,6 @@ async def download_all():
         dict_temp['fields']['updated_on'] = str(i.updated_on)
         all_data.append(dict_temp)
 
-    for i in await query_data(PlayerTeam):
-        dict_temp = {'model': 'player_team', 'fields': {}}
-        dict_temp['fields']['id'] = i.id
-        dict_temp['fields']['id_player'] = i.id_player
-        dict_temp['fields']['id_team'] = i.id_team
-        dict_temp['fields']['created_on'] = str(i.created_on)
-        dict_temp['fields']['updated_on'] = str(i.updated_on)
-        all_data.append(dict_temp)
-
     for i in await query_data(Player):
         dict_temp = {'model': 'player', 'fields': {}}
         dict_temp['fields']['id'] = i.id
@@ -81,18 +77,19 @@ async def download_all():
         dict_temp['fields']['updated_on'] = str(i.updated_on)
         all_data.append(dict_temp)
 
-    for i in await query_data(Parameter):
-        dict_temp = {'model': 'parameter', 'fields': {}}
+    for i in await query_data(PlayerTeam):
+        dict_temp = {'model': 'player_team', 'fields': {}}
         dict_temp['fields']['id'] = i.id
-        dict_temp['fields']['name'] = i.name
+        dict_temp['fields']['id_player'] = i.id_player
+        dict_temp['fields']['id_team'] = i.id_team
         dict_temp['fields']['created_on'] = str(i.created_on)
         dict_temp['fields']['updated_on'] = str(i.updated_on)
         all_data.append(dict_temp)
 
-    for i in await query_data(Role):
-        dict_temp = {'model': 'role', 'fields': {}}
+    for i in await query_data(Parameter):
+        dict_temp = {'model': 'parameter', 'fields': {}}
         dict_temp['fields']['id'] = i.id
-        dict_temp['fields']['name_role'] = i.name_role
+        dict_temp['fields']['name'] = i.name
         dict_temp['fields']['created_on'] = str(i.created_on)
         dict_temp['fields']['updated_on'] = str(i.updated_on)
         all_data.append(dict_temp)
