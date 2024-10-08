@@ -1,17 +1,31 @@
+from fastapi import HTTPException
 from sqlalchemy import select, and_
+from sqlalchemy.orm import joinedload
 
 from backend.src.models import Session, Point, Player, Team, Role, Parameter, Tournament
 from backend.src.models import TournamentPlayer, TournamentTeam, Stat
+from backend.src.schema import PlayerAdd, PlayerRe
 
 
-
-class CountStat:
+class UtilityFunction:
     @classmethod
-    async def stat_params(cls):
-        async with (Session() as session):
+    async def stat_params(cls) -> dict:
+        async with Session() as session:
             result = await session.execute(select(Parameter))
             models = result.unique().scalars().all()
-            return models
+            dict_params = {i.name: i.id for i in models}
+            return dict_params
+
+    @classmethod
+    async def get_name_player(cls, id_player):
+        async with Session() as session:
+            result = await session.execute(
+                select(Player)
+                .options(joinedload(Player.role))
+                .filter(Player.id == id_player))
+            models = result.unique().scalars().all()
+            dto = [PlayerRe.model_validate(row, from_attributes=True) for row in models]
+            return dto
 
 
     @classmethod
@@ -30,33 +44,29 @@ class CountStat:
         shootout_ac = 0
         shootout_goal = 0
 
-        a = await CountStat.stat_params()
-        # for i in a:
-        #     print(i.)
-        s = {'бросок': 1, 'пас': 2}
-
+        dict_params = await UtilityFunction.stat_params()
         for i in list_stat:
-            if i.id_parameter == s['бросок']:
+            if i.id_parameter == dict_params['Бросок']:
                 shot += 1
                 if i.accuracy:
                     shot_ac += 1
                 if i.result:
                     goal += 1
-            elif i.id_parameter == 2:
+            elif i.id_parameter == dict_params['Пас']:
                 pas += 1
                 if i.accuracy:
                     pas_ac += 1
-            elif i.id_parameter == 3:
+            elif i.id_parameter == dict_params['Вбрасывание']:
                 face_off += 1
                 if i.accuracy:
                     face_off_ac += 1
-            elif i.id_parameter == 4:
+            elif i.id_parameter == dict_params['Блокировка']:
                 block += 1
-            elif i.id_parameter == 5:
+            elif i.id_parameter == dict_params['Ошибка']:
                 mistake += 1
-            elif i.id_parameter == 6:
+            elif i.id_parameter == dict_params['Штраф']:
                 penalty += 1
-            elif i.id_parameter == 7:
+            elif i.id_parameter == dict_params['Буллит']:
                 shootout += 1
                 if i.accuracy:
                     shootout_ac += 1
@@ -66,34 +76,32 @@ class CountStat:
 
 class DataGet:
     @staticmethod
-    async def find_stat(tournament: int, team: int):
+    async def find_stat(tournament: int, team: int, player: int):
         async with Session() as session:
             query = (
                 select(TournamentTeam.id)
-                .filter(and_(TournamentTeam.id_tournament == tournament,
-                             TournamentTeam.id_team == team))
+                .filter(and_(TournamentTeam.id_tournament == int(tournament),
+                             TournamentTeam.id_team == int(team)))
             )
             result = await session.execute(query)
-            models = result.unique().scalars().all()
+            models = result.unique().scalars().first()
 
             query = (
                 select(TournamentPlayer.id)
-                .filter(and_(TournamentPlayer.id_tournament_team == models[0]),
-                        TournamentPlayer.id_player == 2)
+                .filter(and_(TournamentPlayer.id_tournament_team == models),
+                        TournamentPlayer.id_player == int(player))
             )
             result = await session.execute(query)
-            models = result.unique().scalars().all()
+            models = result.unique().scalars().first()
+            if models is None:
+                raise HTTPException(status_code=422, detail='Данного игрока нет в заявке')
             query = (
                 select(Stat)
-                .filter(Stat.id_player == models[0])
+                .filter(Stat.id_player == models)
             )
             result = await session.execute(query)
             models = result.unique().scalars().all()
-            res = await CountStat.all_param(models)
-            return (f'Dushaev: '
-                    f'бросоков всего = {res[0]}'
-                    f'бросков в створ = {res[1]}'
-                    f'голы = {res[2]}'
-                    f'пасов всего = {res[3]}'
-                    f'точных пасов = {res[4]}')
+            res = await UtilityFunction.all_param(models)
+            name_player = await UtilityFunction.get_name_player(int(player))
+            return res, name_player
 

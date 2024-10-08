@@ -90,11 +90,14 @@ class PlayerAdd(BaseModel):
     first_name: str
     last_name: str
     patronymic: str
-    id_role: int
+    birth: date
 
 
 class FullPlayer(PlayerAdd):
     id: int
+
+class PlayerRe(PlayerAdd):
+    role: 'RoleAdd'
 
 
 # --------------------------
