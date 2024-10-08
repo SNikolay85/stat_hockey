@@ -4,8 +4,8 @@ from datetime import datetime
 import os
 import json
 
-from backend.src.models import Point, Team, TournamentTeam, Tournament, Player, Role, PlayerTeam
-from backend.src.models import Parameter, PlayerParameter, Session, create_tables, delete_tables
+from backend.src.models import Point, Team, TournamentTeam, Tournament, Player, Role, TournamentPlayer
+from backend.src.models import Parameter, Stat, Session, create_tables, delete_tables
 
 
 current = os.getcwd()
@@ -98,15 +98,15 @@ async def load_db(data_stat):
             )
             session.add(player)
             await session.commit()
-        elif record['model'] == 'player_team':
-            player_team = PlayerTeam(
+        elif record['model'] == 'tournament_player':
+            tournament_player = TournamentPlayer(
                 id=record['fields']['id'],
                 id_player=record['fields']['id_player'],
-                id_team=record['fields']['id_team'],
+                id_tournament_team=record['fields']['id_tournament_team'],
                 created_on=format_date(date_time=record['fields']['created_on']),
                 updated_on=format_date(date_time=record['fields']['updated_on'])
             )
-            session.add(player_team)
+            session.add(tournament_player)
             await session.commit()
         elif record['model'] == 'parameter':
             parameter = Parameter(
@@ -117,17 +117,18 @@ async def load_db(data_stat):
             )
             session.add(parameter)
             await session.commit()
-        elif record['model'] == 'player_parameter':
-            player_parameter = PlayerParameter(
+        elif record['model'] == 'stat':
+            stat = Stat(
                 id=record['fields']['id'],
-                id_player=record['fields']['id_player'],
                 id_parameter=record['fields']['id_parameter'],
-                id_team=record['fields']['id_team'],
-                count=record['fields']['count'],
+                accuracy=record['fields']['accuracy'],
+                result=record['fields']['result'],
+                id_player=record['fields']['id_player'],
+                id_assistant=record['fields']['id_assistant'],
                 created_on=format_date(date_time=record['fields']['created_on']),
                 updated_on=format_date(date_time=record['fields']['updated_on'])
             )
-            session.add(player_parameter)
+            session.add(stat)
             await session.commit()
 
     await asyncio.shield(session.close())

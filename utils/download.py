@@ -4,7 +4,7 @@ import os
 import json
 
 from backend.src.models import Session, Point, Team, TournamentTeam, Tournament, Player, Role
-from backend.src.models import Parameter, PlayerParameter, PlayerTeam
+from backend.src.models import Parameter, Stat, TournamentPlayer
 
 current = os.getcwd()
 file_name_base = '../download_stat.json'
@@ -78,11 +78,11 @@ async def download_all():
         dict_temp['fields']['updated_on'] = str(i.updated_on)
         all_data.append(dict_temp)
 
-    for i in await query_data(PlayerTeam):
-        dict_temp = {'model': 'player_team', 'fields': {}}
+    for i in await query_data(TournamentPlayer):
+        dict_temp = {'model': 'tournament_player', 'fields': {}}
         dict_temp['fields']['id'] = i.id
         dict_temp['fields']['id_player'] = i.id_player
-        dict_temp['fields']['id_team'] = i.id_team
+        dict_temp['fields']['id_tournament_team'] = i.id_tournament_team
         dict_temp['fields']['created_on'] = str(i.created_on)
         dict_temp['fields']['updated_on'] = str(i.updated_on)
         all_data.append(dict_temp)
@@ -95,13 +95,14 @@ async def download_all():
         dict_temp['fields']['updated_on'] = str(i.updated_on)
         all_data.append(dict_temp)
 
-    for i in await query_data(PlayerParameter):
-        dict_temp = {'model': 'player_parameter', 'fields': {}}
+    for i in await query_data(Stat):
+        dict_temp = {'model': 'stat', 'fields': {}}
         dict_temp['fields']['id'] = i.id
-        dict_temp['fields']['id_player'] = i.id_player
         dict_temp['fields']['id_parameter'] = i.id_parameter
-        dict_temp['fields']['id_team'] = i.id_team
-        dict_temp['fields']['count'] = i.count
+        dict_temp['fields']['accuracy'] = i.accuracy
+        dict_temp['fields']['result'] = i.result
+        dict_temp['fields']['id_player'] = i.id_player
+        dict_temp['fields']['id_assistant'] = i.id_assistant
         dict_temp['fields']['created_on'] = str(i.created_on)
         dict_temp['fields']['updated_on'] = str(i.updated_on)
         all_data.append(dict_temp)
