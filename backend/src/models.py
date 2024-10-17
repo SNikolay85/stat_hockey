@@ -1,7 +1,6 @@
 from time import timezone
 from typing import Optional
 
-from cryptography.hazmat.backends.openssl import backend
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy import Float, String, ForeignKey, MetaData, Date, DateTime, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped
@@ -129,6 +128,20 @@ class TournamentTeam(Base):
     team: Mapped['Team'] = relationship(back_populates='tournament_teams')
     tournament_players: Mapped[list['TournamentPlayer']] = relationship(back_populates='tournament_team')
 
+
+    repr_cols_num = 3
+    repr_cols = tuple()
+
+
+class Game(Base):
+    __tablename__ = 'game'
+
+    id: Mapped[intpk]
+    first_team: Mapped[team_fk]
+    second_team: Mapped[team_fk]
+
+    created_on: Mapped[created_on]
+    updated_on: Mapped[updated_on]
 
     repr_cols_num = 3
     repr_cols = tuple()

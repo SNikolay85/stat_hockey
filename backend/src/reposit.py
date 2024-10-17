@@ -17,6 +17,13 @@ class UtilityFunction:
             return dict_params
 
     @classmethod
+    async def get_id_team(cls, name: str) -> int:
+        async with Session() as session:
+            result = await session.execute(select(Team.id))
+            models = result.unique().scalars().first()
+            return models
+
+    @classmethod
     async def get_name_player(cls, id_player):
         async with Session() as session:
             result = await session.execute(
