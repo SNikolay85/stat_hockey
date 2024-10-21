@@ -225,6 +225,7 @@ class Stat(Base):
     id_player: Mapped[tournament_player_fk]
     id_assistant: Mapped[tournament_player_fk] = mapped_column(nullable=True)
     #__table_args__ = (UniqueConstraint('id_player', 'id_parameter', 'id_team',  name='player_parameter_uc'),)
+    # test for del
 
     created_on: Mapped[created_on]
     updated_on: Mapped[updated_on]
