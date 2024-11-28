@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 import json
 
-from backend.src.models import Point, Team, TournamentTeam, Tournament, Player, Role, TournamentPlayer
+from backend.src.models import Point, Team, Arena, Tournament, Player, Role, GamePlayer, Game
 from backend.src.models import Parameter, Stat, Session, create_tables, delete_tables
 
 
@@ -44,15 +44,6 @@ async def load_db(data_stat):
             )
             session.add(point)
             await session.commit()
-        elif record['model'] == 'role':
-            role = Role(
-                id=record['fields']['id'],
-                name_role=record['fields']['name_role'],
-                created_on=format_date(date_time=record['fields']['created_on']),
-                updated_on=format_date(date_time=record['fields']['updated_on'])
-            )
-            session.add(role)
-            await session.commit()
         elif record['model'] == 'team':
             team = Team(
                 id=record['fields']['id'],
@@ -63,27 +54,36 @@ async def load_db(data_stat):
             )
             session.add(team)
             await session.commit()
+        elif record['model'] == 'role':
+            role = Role(
+                id=record['fields']['id'],
+                name_role=record['fields']['name_role'],
+                created_on=format_date(date_time=record['fields']['created_on']),
+                updated_on=format_date(date_time=record['fields']['updated_on'])
+            )
+            session.add(role)
+            await session.commit()
+        elif record['model'] == 'arena':
+            arena = Arena(
+                id=record['fields']['id'],
+                name_arena=record['fields']['name_arena'],
+                id_point=record['fields']['id_point'],
+                created_on=format_date(date_time=record['fields']['created_on']),
+                updated_on=format_date(date_time=record['fields']['updated_on'])
+            )
+            session.add(arena)
+            await session.commit()
         elif record['model'] == 'tournament':
             tournament = Tournament(
                 id=record['fields']['id'],
                 name_tournament=record['fields']['name_tournament'],
                 date_start=format_date(date=record['fields']['date_start']),
                 date_finish=format_date(date=record['fields']['date_finish']),
-                id_point=record['fields']['id_point'],
+                id_point=record['fields']['id_arena'],
                 created_on=format_date(date_time=record['fields']['created_on']),
                 updated_on=format_date(date_time=record['fields']['updated_on'])
             )
             session.add(tournament)
-            await session.commit()
-        elif record['model'] == 'tournament_team':
-            tournament_team = TournamentTeam(
-                id=record['fields']['id'],
-                id_tournament=record['fields']['id_tournament'],
-                id_team=record['fields']['id_team'],
-                created_on=format_date(date_time=record['fields']['created_on']),
-                updated_on=format_date(date_time=record['fields']['updated_on'])
-            )
-            session.add(tournament_team)
             await session.commit()
         elif record['model'] == 'player':
             player = Player(
@@ -98,16 +98,6 @@ async def load_db(data_stat):
             )
             session.add(player)
             await session.commit()
-        elif record['model'] == 'tournament_player':
-            tournament_player = TournamentPlayer(
-                id=record['fields']['id'],
-                id_player=record['fields']['id_player'],
-                id_tournament_team=record['fields']['id_tournament_team'],
-                created_on=format_date(date_time=record['fields']['created_on']),
-                updated_on=format_date(date_time=record['fields']['updated_on'])
-            )
-            session.add(tournament_player)
-            await session.commit()
         elif record['model'] == 'parameter':
             parameter = Parameter(
                 id=record['fields']['id'],
@@ -117,18 +107,38 @@ async def load_db(data_stat):
             )
             session.add(parameter)
             await session.commit()
+        elif record['model'] == 'game':
+            game = Game(
+                id=record['fields']['id'],
+                id_first_team=record['fields']['id_first_team'],
+                id_second_team=record['fields']['id_second_team'],
+                id_tournament=record['fields']['id_tournament'],
+                created_on=format_date(date_time=record['fields']['created_on']),
+                updated_on=format_date(date_time=record['fields']['updated_on'])
+            )
+            session.add(game)
+            await session.commit()
         elif record['model'] == 'stat':
             stat = Stat(
                 id=record['fields']['id'],
                 id_parameter=record['fields']['id_parameter'],
-                accuracy=record['fields']['accuracy'],
-                result=record['fields']['result'],
+                count=record['fields']['count'],
                 id_player=record['fields']['id_player'],
-                id_assistant=record['fields']['id_assistant'],
+                id_game=record['fields']['id_game'],
                 created_on=format_date(date_time=record['fields']['created_on']),
                 updated_on=format_date(date_time=record['fields']['updated_on'])
             )
             session.add(stat)
+            await session.commit()
+        elif record['model'] == 'game_player':
+            game_player = GamePlayer(
+                id=record['fields']['id'],
+                id_game=record['fields']['id_game'],
+                id_player=record['fields']['id_player'],
+                created_on=format_date(date_time=record['fields']['created_on']),
+                updated_on=format_date(date_time=record['fields']['updated_on'])
+            )
+            session.add(game_player)
             await session.commit()
 
     await asyncio.shield(session.close())

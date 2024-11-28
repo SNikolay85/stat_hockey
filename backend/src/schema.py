@@ -25,8 +25,38 @@ class FullPoint(PointAdd):
 
 class FullPointRe(FullPoint):
     teams: list['FullTeam']
-    players: list['FullPlayer']
+    arenas: list['FullPlayer']
+
+
+# --------------------------
+# schemes for model Arena
+class ArenaAdd(BaseModel):
+    name_arena: str = Field(max_lenght=100)
+
+
+class FullArena(ArenaAdd):
+    id: int
+
+
+class FullArenaRe(FullArena):
+    point: 'FullPoint'
     tournaments: list['FullTournament']
+
+
+# --------------------------
+# schemes for model Game
+class GameAdd(BaseModel):
+    id_first_team: int
+    id_second_team: int
+    id_tournament: int
+
+
+class FullGame(GameAdd):
+    id: int
+
+
+class FullGameRe(FullGame):
+    tournament: 'FullTournament'
 
 
 # --------------------------
@@ -43,7 +73,8 @@ class FullTournament(TournamentAdd):
 
 
 class FullTournamentRe(FullTournament):
-    point: 'FullPoint'
+    games: list['FullGame']
+    arena: 'FullArena'
 
 
 # --------------------------
@@ -59,29 +90,6 @@ class FullTeam(TeamAdd):
 
 class FullTeamRe(FullTeam):
     point: FullPoint
-    players: list['FullPlayer']
-
-
-# --------------------------
-# schemes for model TournamentTeam
-class TournamentTeamAdd(BaseModel):
-    id_tournament: int
-    id_team: int
-
-
-class FullTournamentTeam(TournamentTeamAdd):
-    id: int
-
-
-# --------------------------
-# schemes for model PlayerTeam
-class PlayerTeamAdd(BaseModel):
-    id_player: int
-    id_team: int
-
-
-class FullPlayerTeam(PlayerTeamAdd):
-    id: int
 
 
 # --------------------------
@@ -91,13 +99,15 @@ class PlayerAdd(BaseModel):
     last_name: str
     patronymic: str
     birth: date
+    id_role: int
 
 
 class FullPlayer(PlayerAdd):
     id: int
 
+
 class PlayerRe(PlayerAdd):
-    role: 'RoleAdd'
+    role: 'FullRole'
 
 
 # --------------------------
@@ -111,19 +121,6 @@ class FullParameter(ParameterAdd):
 
 
 # --------------------------
-# schemes for model PlayerParameter
-class PlayerParameterAdd(BaseModel):
-    id_player: int
-    id_parameter: int
-    id_team: int
-    count: int
-
-
-class FullPlayerParameter(PlayerParameterAdd):
-    id: int
-
-
-# --------------------------
 # schemes for modelRole
 class RoleAdd(BaseModel):
     name_role: str
@@ -131,6 +128,3 @@ class RoleAdd(BaseModel):
 
 class FullRole(RoleAdd):
     id: int
-
-
-

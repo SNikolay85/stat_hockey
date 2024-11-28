@@ -3,7 +3,7 @@ from sqlalchemy import select, and_
 from sqlalchemy.orm import joinedload
 
 from backend.src.models import Session, Point, Player, Team, Role, Parameter, Tournament
-from backend.src.models import TournamentPlayer, TournamentTeam, Stat
+from backend.src.models import GamePlayer, Game, Arena, Stat
 from backend.src.schema import PlayerAdd, PlayerRe
 
 
@@ -33,7 +33,6 @@ class UtilityFunction:
             models = result.unique().scalars().all()
             dto = [PlayerRe.model_validate(row, from_attributes=True) for row in models]
             return dto
-
 
     @classmethod
     async def all_param(cls, list_stat: list):
@@ -81,34 +80,8 @@ class UtilityFunction:
                     shootout_goal += 1
         return shot, shot_ac, goal, pas, pas_ac, face_off, face_off_ac, block, mistake, penalty, shootout, shootout_ac, shootout_goal
 
+
 class DataGet:
     @staticmethod
     async def find_stat(tournament: int, team: int, player: int):
-        async with Session() as session:
-            query = (
-                select(TournamentTeam.id)
-                .filter(and_(TournamentTeam.id_tournament == int(tournament),
-                             TournamentTeam.id_team == int(team)))
-            )
-            result = await session.execute(query)
-            models = result.unique().scalars().first()
-
-            query = (
-                select(TournamentPlayer.id)
-                .filter(and_(TournamentPlayer.id_tournament_team == models),
-                        TournamentPlayer.id_player == int(player))
-            )
-            result = await session.execute(query)
-            models = result.unique().scalars().first()
-            if models is None:
-                raise HTTPException(status_code=422, detail='Данного игрока нет в заявке')
-            query = (
-                select(Stat)
-                .filter(Stat.id_player == models)
-            )
-            result = await session.execute(query)
-            models = result.unique().scalars().all()
-            res = await UtilityFunction.all_param(models)
-            name_player = await UtilityFunction.get_name_player(int(player))
-            return res, name_player
-
+        pass

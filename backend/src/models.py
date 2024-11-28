@@ -26,9 +26,9 @@ tournament_fk = Annotated[int, mapped_column(ForeignKey('tournament.id', ondelet
 player_fk = Annotated[int, mapped_column(ForeignKey('player.id', ondelete="CASCADE"))]
 parameter_fk = Annotated[int, mapped_column(ForeignKey('parameter.id', ondelete="CASCADE"))]
 role_fk = Annotated[int, mapped_column(ForeignKey('role.id', ondelete="CASCADE"))]
-tournament_team_fk = Annotated[int, mapped_column(ForeignKey('tournament_team.id', ondelete="CASCADE"))]
-tournament_player_fk = Annotated[int, mapped_column(ForeignKey('tournament_player.id', ondelete="CASCADE"))]
-
+game_fk = Annotated[int, mapped_column(ForeignKey('game.id', ondelete="CASCADE"))]
+arena_fk = Annotated[int, mapped_column(ForeignKey('arena.id', ondelete="CASCADE"))]
+game_player_fk = Annotated[int, mapped_column(ForeignKey('game_player.id', ondelete="CASCADE"))]
 
 str100 = Annotated[str, 100]
 str20 = Annotated[str, 20]
@@ -66,14 +66,14 @@ class Tournament(Base):
     name_tournament: Mapped[str100] = mapped_column(unique=True)
     date_start: Mapped[date]
     date_finish: Mapped[date]
-    id_point: Mapped[point_fk]
+    id_arena: Mapped[arena_fk]
     __table_args__ = (UniqueConstraint('name_tournament', 'date_start', 'date_finish', name='tournament_uc'),)
 
     created_on: Mapped[created_on]
     updated_on: Mapped[updated_on]
 
-    tournament_teams: Mapped[list['TournamentTeam']] = relationship(back_populates='tournament')
-    point: Mapped['Point'] = relationship(back_populates='tournaments')
+    games: Mapped[list['Game']] = relationship(back_populates='tournament')
+    arena: Mapped['Arena'] = relationship(back_populates='tournaments')
 
     repr_cols_num = 4
     repr_cols = tuple()
@@ -89,10 +89,22 @@ class Point(Base):
     updated_on: Mapped[updated_on]
 
     teams: Mapped[list['Team']] = relationship(back_populates='point')
-    tournaments: Mapped[list['Tournament']] = relationship(back_populates='point')
+    arenas: Mapped[list['Arena']] = relationship(back_populates='point')
 
-    repr_cols_num = 2
-    repr_cols = tuple()
+
+class Arena(Base):
+    __tablename__ = 'arena'
+
+    id: Mapped[intpk]
+    name_arena: Mapped[str100]
+    id_point: Mapped[point_fk]
+    __table_args__ = (UniqueConstraint('name_arena', 'id_point', name='arena_point_uc'),)
+
+    created_on: Mapped[created_on]
+    updated_on: Mapped[updated_on]
+
+    point: Mapped['Point'] = relationship(back_populates='arenas')
+    tournaments: Mapped[list['Tournament']] = relationship(back_populates='arena')
 
 
 class Team(Base):
@@ -107,64 +119,11 @@ class Team(Base):
     updated_on: Mapped[updated_on]
 
     point: Mapped['Point'] = relationship(back_populates='teams')
-    tournament_teams: Mapped[list['TournamentTeam']] = relationship(back_populates='team')
 
-    repr_cols_num = 3
-    repr_cols = tuple()
-
-
-class TournamentTeam(Base):
-    __tablename__ = 'tournament_team'
-
-    id: Mapped[intpk]
-    id_tournament: Mapped[tournament_fk]
-    id_team: Mapped[team_fk]
-    __table_args__ = (UniqueConstraint('id_tournament', 'id_team', name='tournament_team_uc'),)
-
-    created_on: Mapped[created_on]
-    updated_on: Mapped[updated_on]
-
-    tournament: Mapped['Tournament'] = relationship(back_populates='tournament_teams')
-    team: Mapped['Team'] = relationship(back_populates='tournament_teams')
-    tournament_players: Mapped[list['TournamentPlayer']] = relationship(back_populates='tournament_team')
-
-
-    repr_cols_num = 3
-    repr_cols = tuple()
-
-
-class Game(Base):
-    __tablename__ = 'game'
-
-    id: Mapped[intpk]
-    first_team: Mapped[team_fk]
-    second_team: Mapped[team_fk]
-
-    created_on: Mapped[created_on]
-    updated_on: Mapped[updated_on]
-
-    repr_cols_num = 3
-    repr_cols = tuple()
-
-
-class TournamentPlayer(Base):
-    __tablename__ = 'tournament_player'
-
-    id: Mapped[intpk]
-    id_player: Mapped[player_fk]
-    id_tournament_team: Mapped[tournament_team_fk]
-    __table_args__ = (UniqueConstraint('id_player', 'id_tournament_team', name='tournament_player_uc'),)
-
-    created_on: Mapped[created_on]
-    updated_on: Mapped[updated_on]
-
-    stats_player: Mapped[list['Stat']] = relationship(back_populates='player_stat',
-                                                      foreign_keys='[Stat.id_player]')
-    stats_assistant: Mapped[list['Stat']] = relationship(back_populates='assistant_stat',
-                                                       foreign_keys='[Stat.id_assistant]')
-
-    player: Mapped['Player'] = relationship(back_populates='tournament_players')
-    tournament_team: Mapped['TournamentTeam'] = relationship(back_populates='tournament_players')
+    team_first: Mapped[list['Game']] = relationship(back_populates='first_team',
+                                                    foreign_keys='[Game.id_first_team]')
+    team_second: Mapped[list['Game']] = relationship(back_populates='second_team',
+                                                     foreign_keys='[Game.id_second_team]')
 
     repr_cols_num = 3
     repr_cols = tuple()
@@ -196,8 +155,8 @@ class Player(Base):
     created_on: Mapped[created_on]
     updated_on: Mapped[updated_on]
 
-    tournament_players: Mapped[list['TournamentPlayer']] = relationship(back_populates='player')
     role: Mapped['Role'] = relationship(back_populates='players')
+    game_players: Mapped[list['GamePlayer']] = relationship(back_populates='player')
 
     repr_cols_num = 4
     repr_cols = tuple()
@@ -220,22 +179,56 @@ class Stat(Base):
 
     id: Mapped[intpk]
     id_parameter: Mapped[parameter_fk]
-    accuracy: Mapped[bool]
-    result: Mapped[bool] = mapped_column(nullable=True)
-    id_player: Mapped[tournament_player_fk]
-    id_assistant: Mapped[tournament_player_fk] = mapped_column(nullable=True)
-    #__table_args__ = (UniqueConstraint('id_player', 'id_parameter', 'id_team',  name='player_parameter_uc'),)
-    # test for del
+    count: Mapped[int]
+    id_player: Mapped[player_fk]
+    id_game: Mapped[game_fk]
+    __table_args__ = (UniqueConstraint('id_player', 'id_parameter', 'id_game',  name='stat_uc'),)
 
     created_on: Mapped[created_on]
     updated_on: Mapped[updated_on]
 
-    player_stat: Mapped['TournamentPlayer'] = relationship(back_populates='stats_player', foreign_keys='[Stat.id_player]')
-    assistant_stat: Mapped['TournamentPlayer'] = relationship(back_populates='stats_assistant', foreign_keys='[Stat.id_assistant]')
+    player: Mapped['Player'] = relationship(back_populates='stats')
+    game: Mapped['Game'] = relationship(back_populates='stats')
     parameter: Mapped['Parameter'] = relationship(back_populates='stats')
+
+    repr_cols_num = 5
+    repr_cols = tuple()
+
+
+class Game(Base):
+    __tablename__ = 'game'
+
+    id: Mapped[intpk]
+    id_first_team: Mapped[team_fk]
+    id_second_team: Mapped[team_fk]
+    id_tournament: Mapped[tournament_fk]
+
+    created_on: Mapped[created_on]
+    updated_on: Mapped[updated_on]
+
+    first_team: Mapped['Team'] = relationship(back_populates='team_first', foreign_keys='[Game.id_first_team]')
+    second_team: Mapped['Team'] = relationship(back_populates='team_second', foreign_keys='[Game.id_second_team]')
+
+    tournament: Mapped['Tournament'] = relationship(back_populates='games')
+    game_players: Mapped[list['GamePlayer']] = relationship(back_populates='game')
 
     repr_cols_num = 4
     repr_cols = tuple()
+
+
+class GamePlayer(Base):
+    __tablename__ = 'game_player'
+
+    id: Mapped[intpk]
+    id_game: Mapped[game_fk]
+    id_player: Mapped[player_fk]
+    __table_args__ = (UniqueConstraint('id_game', 'id_player', name='game_player_uc'),)
+
+    created_on: Mapped[created_on]
+    updated_on: Mapped[updated_on]
+
+    game: Mapped['Game'] = relationship(back_populates='game_players')
+    player: Mapped['Player'] = relationship(back_populates='game_players')
 
 
 async def delete_tables():
