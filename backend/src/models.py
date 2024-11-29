@@ -156,6 +156,7 @@ class Player(Base):
     updated_on: Mapped[updated_on]
 
     role: Mapped['Role'] = relationship(back_populates='players')
+    stats: Mapped[list['Stat']] = relationship(back_populates='player')
     game_players: Mapped[list['GamePlayer']] = relationship(back_populates='player')
 
     repr_cols_num = 4
@@ -211,6 +212,7 @@ class Game(Base):
 
     tournament: Mapped['Tournament'] = relationship(back_populates='games')
     game_players: Mapped[list['GamePlayer']] = relationship(back_populates='game')
+    stats: Mapped[list['Stat']] = relationship(back_populates='game')
 
     repr_cols_num = 4
     repr_cols = tuple()

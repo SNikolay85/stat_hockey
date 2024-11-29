@@ -1,8 +1,8 @@
-"""create table
+"""Database creation
 
-Revision ID: 471c7df07642
+Revision ID: a5b130b23bd7
 Revises: 
-Create Date: 2024-09-17 16:24:26.506405
+Create Date: 2024-11-29 14:08:54.752041
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "471c7df07642"
+revision: str = "a5b130b23bd7"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -60,6 +60,79 @@ def upgrade() -> None:
         sa.UniqueConstraint("name_point"),
     )
     op.create_table(
+        "role",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("name_role", sa.String(length=50), nullable=False),
+        sa.Column(
+            "created_on",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_on",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("name_role"),
+    )
+    op.create_table(
+        "arena",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("name_arena", sa.String(length=100), nullable=False),
+        sa.Column("id_point", sa.Integer(), nullable=False),
+        sa.Column(
+            "created_on",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_on",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ["id_point"], ["point.id"], ondelete="CASCADE"
+        ),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("name_arena", "id_point", name="arena_point_uc"),
+    )
+    op.create_table(
+        "player",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("first_name", sa.String(length=50), nullable=False),
+        sa.Column("last_name", sa.String(length=50), nullable=False),
+        sa.Column("patronymic", sa.String(length=50), nullable=False),
+        sa.Column("birth", sa.Date(), nullable=False),
+        sa.Column("id_role", sa.Integer(), nullable=False),
+        sa.Column(
+            "created_on",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_on",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(["id_role"], ["role.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint(
+            "first_name",
+            "last_name",
+            "patronymic",
+            "birth",
+            "id_role",
+            name="player_uc",
+        ),
+    )
+    op.create_table(
         "team",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("name_team", sa.String(length=100), nullable=False),
@@ -89,7 +162,7 @@ def upgrade() -> None:
         sa.Column("name_tournament", sa.String(length=100), nullable=False),
         sa.Column("date_start", sa.Date(), nullable=False),
         sa.Column("date_finish", sa.Date(), nullable=False),
-        sa.Column("id_point", sa.Integer(), nullable=False),
+        sa.Column("id_arena", sa.Integer(), nullable=False),
         sa.Column(
             "created_on",
             sa.DateTime(timezone=True),
@@ -103,7 +176,7 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.ForeignKeyConstraint(
-            ["id_point"], ["point.id"], ondelete="CASCADE"
+            ["id_arena"], ["arena.id"], ondelete="CASCADE"
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name_tournament"),
@@ -115,39 +188,11 @@ def upgrade() -> None:
         ),
     )
     op.create_table(
-        "player",
+        "game",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("first_name", sa.String(length=50), nullable=False),
-        sa.Column("last_name", sa.String(length=50), nullable=False),
-        sa.Column("patronymic", sa.String(length=50), nullable=False),
-        sa.Column("id_team", sa.Integer(), nullable=False),
-        sa.Column(
-            "created_on",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_on",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.ForeignKeyConstraint(["id_team"], ["team.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint(
-            "first_name",
-            "last_name",
-            "patronymic",
-            "id_team",
-            name="player_uc",
-        ),
-    )
-    op.create_table(
-        "tournament_team",
-        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("id_first_team", sa.Integer(), nullable=False),
+        sa.Column("id_second_team", sa.Integer(), nullable=False),
         sa.Column("id_tournament", sa.Integer(), nullable=False),
-        sa.Column("id_team", sa.Integer(), nullable=False),
         sa.Column(
             "created_on",
             sa.DateTime(timezone=True),
@@ -160,22 +205,22 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["id_team"], ["team.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["id_first_team"], ["team.id"], ondelete="CASCADE"
+        ),
+        sa.ForeignKeyConstraint(
+            ["id_second_team"], ["team.id"], ondelete="CASCADE"
+        ),
         sa.ForeignKeyConstraint(
             ["id_tournament"], ["tournament.id"], ondelete="CASCADE"
         ),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint(
-            "id_tournament", "id_team", name="tournament_team_uc"
-        ),
     )
     op.create_table(
-        "player_parameter",
+        "game_player",
         sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("id_game", sa.Integer(), nullable=False),
         sa.Column("id_player", sa.Integer(), nullable=False),
-        sa.Column("id_parameter", sa.Integer(), nullable=False),
-        sa.Column("id_team", sa.Integer(), nullable=False),
-        sa.Column("count", sa.Integer(), nullable=False),
         sa.Column(
             "created_on",
             sa.DateTime(timezone=True),
@@ -188,16 +233,42 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
+        sa.ForeignKeyConstraint(["id_game"], ["game.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["id_player"], ["player.id"], ondelete="CASCADE"
+        ),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("id_game", "id_player", name="game_player_uc"),
+    )
+    op.create_table(
+        "stat",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("id_parameter", sa.Integer(), nullable=False),
+        sa.Column("count", sa.Integer(), nullable=False),
+        sa.Column("id_player", sa.Integer(), nullable=False),
+        sa.Column("id_game", sa.Integer(), nullable=False),
+        sa.Column(
+            "created_on",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_on",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(["id_game"], ["game.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(
             ["id_parameter"], ["parameter.id"], ondelete="CASCADE"
         ),
         sa.ForeignKeyConstraint(
             ["id_player"], ["player.id"], ondelete="CASCADE"
         ),
-        sa.ForeignKeyConstraint(["id_team"], ["team.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint(
-            "id_player", "id_parameter", "id_team", name="player_parameter_uc"
+            "id_player", "id_parameter", "id_game", name="stat_uc"
         ),
     )
     # ### end Alembic commands ###
@@ -205,11 +276,14 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_table("player_parameter")
-    op.drop_table("tournament_team")
-    op.drop_table("player")
+    op.drop_table("stat")
+    op.drop_table("game_player")
+    op.drop_table("game")
     op.drop_table("tournament")
     op.drop_table("team")
+    op.drop_table("player")
+    op.drop_table("arena")
+    op.drop_table("role")
     op.drop_table("point")
     op.drop_table("parameter")
     # ### end Alembic commands ###
