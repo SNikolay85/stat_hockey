@@ -202,6 +202,7 @@ class Game(Base):
     id: Mapped[intpk]
     id_first_team: Mapped[team_fk]
     id_second_team: Mapped[team_fk]
+    date_game: Mapped[date]
     id_tournament: Mapped[tournament_fk]
 
     created_on: Mapped[created_on]
