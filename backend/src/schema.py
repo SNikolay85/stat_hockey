@@ -48,6 +48,7 @@ class FullArenaRe(FullArena):
 class GameAdd(BaseModel):
     id_first_team: int
     id_second_team: int
+    date_game: date
     id_tournament: int
 
 

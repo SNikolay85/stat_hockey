@@ -5,6 +5,16 @@ from sqlalchemy.orm import joinedload
 from backend.src.models import Session, Point, Player, Team, Role, Parameter, Tournament
 from backend.src.models import GamePlayer, Game, Arena, Stat
 from backend.src.schema import PlayerAdd, PlayerRe
+from utils.load_game_from_excell import load_stat_of_game
+import os
+import pandas as pd
+
+# current = os.getcwd()
+# file_name_base = r'..\stat_xls\stat.xlsx'
+# full_path = os.path.join(current, file_name_base)
+
+#
+# xl = pd.ExcelFile(full_path)
 
 
 class UtilityFunction:
@@ -85,3 +95,17 @@ class DataGet:
     @staticmethod
     async def find_stat(tournament: int, team: int, player: int):
         pass
+
+
+class DataLoad:
+    @staticmethod
+    async def load_game(id_tournament):
+        current = os.getcwd()
+        file_name_base = r'stat_xls/stat.xlsx'
+        full_path = os.path.join(current, file_name_base)
+        # full_path = r'\//wsl.localhost/Ubuntu - 22.04/home/nikolay_speshilov/stat_hockey/stat_xls/stat.xlsx'
+        # file_name_base = r'stat_xls/stat.xlsx'
+        # data_base = load_stat_of_game(full_path)
+        return full_path#data_base
+
+

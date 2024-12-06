@@ -13,7 +13,7 @@ from config import PG_DB, PG_USER, PG_PASSWORD, PG_HOST, PG_PORT
 
 PG_DSN = f"postgresql+asyncpg://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DB}"
 
-engine = create_async_engine(PG_DSN, echo=True)
+engine = create_async_engine(PG_DSN, echo=False)
 
 Session = async_sessionmaker(engine, expire_on_commit=False)
 

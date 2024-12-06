@@ -91,6 +91,7 @@ async def download_all():
         dict_temp['fields']['id'] = i.id
         dict_temp['fields']['id_first_team'] = i.id_first_team
         dict_temp['fields']['id_second_team'] = i.id_second_team
+        dict_temp['fields']['date_game'] = str(i.date_game)
         dict_temp['fields']['id_tournament'] = i.id_tournament
         dict_temp['fields']['created_on'] = str(i.created_on)
         dict_temp['fields']['updated_on'] = str(i.updated_on)

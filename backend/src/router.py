@@ -1,7 +1,16 @@
-from backend.src.reposit import DataGet
+from backend.src.reposit import DataGet, DataLoad
 from fastapi import APIRouter
 
+# from utils.load_game_from_excell import load_stat_of_game
+from utils.load_game_to_base import load_db
+
 router_stat = APIRouter(prefix='/stat', tags=['Stat'])
+
+
+@router_stat.post('/{tournament}')
+async def add_game(tournament):
+    game = await DataLoad.load_game(tournament)
+    return game
 
 
 @router_stat.get('/{tournament}/{team}/{player}')

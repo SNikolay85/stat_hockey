@@ -112,6 +112,7 @@ async def load_db(data_stat):
                 id=record['fields']['id'],
                 id_first_team=record['fields']['id_first_team'],
                 id_second_team=record['fields']['id_second_team'],
+                date_game=format_date(date=record['fields']['date_game']),
                 id_tournament=record['fields']['id_tournament'],
                 created_on=format_date(date_time=record['fields']['created_on']),
                 updated_on=format_date(date_time=record['fields']['updated_on'])
