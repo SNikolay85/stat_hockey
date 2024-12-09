@@ -113,5 +113,5 @@ async def load_db(id_tournament):
 
 if __name__ == '__main__':
     # asyncio.get_event_loop().run_until_complete(reboot_tables())
-    # print('Таблицы пересозданы')
-    asyncio.get_event_loop().run_until_complete(load_db(1))
+    print('Таблицы пересозданы')
+    # asyncio.get_event_loop().run_until_complete(load_db(1))

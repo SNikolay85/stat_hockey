@@ -1,12 +1,18 @@
+import datetime
 from pprint import pprint
 
 import pandas as pd
 import os
+import json
 
 current = os.getcwd()
-file_name_base = '../stat_xls/stat.xlsx'
-full_path = os.path.join(current, file_name_base)
-print(full_path)
+file_name_excell = '../stat_xls/stat.xlsx'
+file_name_data = '../data.json'
+full_path_excell = os.path.join(current, file_name_excell)
+full_path_data = os.path.join(current, file_name_data)
+print(full_path_excell)
+print(file_name_data)
+
 
 def load_stat_of_game(base_path):
     xl = pd.ExcelFile(base_path)
@@ -19,7 +25,8 @@ def load_stat_of_game(base_path):
         if 'game' in sheet_name:
             df_player = xl.parse(sheet_name, usecols='B:P', header=1, nrows=200)
             df_game = xl.parse(sheet_name, usecols='B, D, G')
-            info_game = list(df_game.head(0))
+            # info_game = list(df_game.head(0))
+            info_game = list(map(lambda x: str(x.date()) if type(x) is datetime.datetime else x, list(df_game.head(0))))
             list_player = list(filter(lambda x: type(x) is not float, df_player['игрок'].unique()))
             if 'соперник' in list_player:
                 foul_s = len(df_player[(df_player['вид'] == 'фол')
@@ -136,4 +143,6 @@ def load_stat_of_game(base_path):
 
 
 if __name__ == '__main__':
-    pprint(load_stat_of_game(full_path))
+    with open(full_path_data, "w") as write_file:
+        json.dump(load_stat_of_game(full_path_excell), write_file)
+    pprint(load_stat_of_game(full_path_excell))
