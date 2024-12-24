@@ -20,10 +20,10 @@ async def lifespan(app: FastAPI):
     print('Выключение')
 
 
-app_route = FastAPI(title='Statistics', lifespan=lifespan)
+app_stat = FastAPI(title='Statistics', lifespan=lifespan)
 
 
-app_route.include_router(stat)
+app_stat.include_router(stat)
 
 
 origins = [
@@ -33,7 +33,7 @@ origins = [
     'http://127.0.0.1:8001',
 ]
 
-app_route.add_middleware(
+app_stat.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,

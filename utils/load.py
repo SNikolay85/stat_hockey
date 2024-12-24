@@ -79,7 +79,7 @@ async def load_db(data_stat):
                 name_tournament=record['fields']['name_tournament'],
                 date_start=format_date(date=record['fields']['date_start']),
                 date_finish=format_date(date=record['fields']['date_finish']),
-                id_point=record['fields']['id_arena'],
+                id_arena=record['fields']['id_arena'],
                 created_on=format_date(date_time=record['fields']['created_on']),
                 updated_on=format_date(date_time=record['fields']['updated_on'])
             )
